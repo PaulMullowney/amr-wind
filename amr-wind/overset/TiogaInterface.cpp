@@ -176,13 +176,12 @@ void TiogaInterface::register_solution(
 
             for (amrex::MFIter mfi(qcfab); mfi.isValid(); ++mfi) {
                 ad.qcell.h_view[ilp] = qcfab[mfi].dataPtr();
-                ad.qcell.d_view[ilp] = qcfab[mfi].dataPtr();
                 ad.qnode.h_view[ilp] = qnfab[mfi].dataPtr();
-                ad.qnode.d_view[ilp] = qnfab[mfi].dataPtr();
-
                 ++ilp;
             }
         }
+        m_amr_data->qcell.copy_to_device();
+        m_amr_data->qnode.copy_to_device();
     }
 }
 
@@ -305,14 +304,13 @@ void TiogaInterface::amr_to_tioga_mesh()
             auto& ibn = ibnodefab[mfi];
             ad.iblank_cell.h_view[ilp] = ib.dataPtr();
             ad.iblank_node.h_view[ilp] = ibn.dataPtr();
-            ad.iblank_cell.d_view[ilp] = ib.dataPtr();
-            ad.iblank_node.d_view[ilp] = ibn.dataPtr();
-
             ++ilp;
         }
     }
 
     // Synchronize data on host/device
+    m_amr_data->iblank_node.copy_to_device();
+    m_amr_data->iblank_cell.copy_to_device();
     m_amr_data->level.copy_to_device();
     m_amr_data->mpi_rank.copy_to_device();
     m_amr_data->local_id.copy_to_device();
